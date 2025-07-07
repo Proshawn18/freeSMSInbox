@@ -1,0 +1,83 @@
+<!-- assets/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="/index.html">⬅️ Back to Homepage</a>
+        <h1>🛠️ Admin Panel</h1>
+
+        <div class="nav-links">
+            <a href="/admin-debug.html" class="debug-link">🔬 Go to Debug Page</a>
+        </div>
+
+        <div id="admin-content">
+            <p>Loading admin data...</p>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const adminKey = prompt("Please enter the admin key:");
+
+        const adminContent = document.getElementById('admin-content');
+
+        async function performAdminAction(action, number, messageIndex = null) {
+            const formData = new URLSearchParams();
+            formData.append('key', adminKey);
+            formData.append('action', action);
+            if (number) formData.append('number', number);
+            if (messageIndex) formData.append('messageIndex', messageIndex);
+
+            try {
+                const response = await fetch('/admin/actions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+                if (!response.ok) throw new Error('Action failed');
+                alert('Action successful!');
+                loadAdminData(); // Refresh the view
+            } catch (err) {
+                alert('Error: Could not perform action.');
+                console.error(err);
+            }
+        }
+
+        async function loadAdminData() {
+            // In a real app, you'd have an admin endpoint to fetch all numbers.
+            // For now, we'll just provide the action forms.
+            // This is a simplified example.
+            adminContent.innerHTML = `
+                <h2>Archive/Unarchive Number</h2>
+                <form onsubmit="event.preventDefault(); performAdminAction('archive', this.number.value);">
+                    <input name="number" placeholder="Number to archive (e.g., 1555...)" required>
+                    <button type="submit">Archive</button>
+                </form>
+                <form onsubmit="event.preventDefault(); performAdminAction('unarchive', this.number.value);">
+                    <input name="number" placeholder="Number to unarchive (e.g., 1555...)" required>
+                    <button type="submit">Unarchive</button>
+                </form>
+                <hr>
+                <h2>Delete a Message</h2>
+                <form onsubmit="event.preventDefault(); performAdminAction('delete-message', this.number.value, this.index.value);">
+                    <input name="number" placeholder="Number (e.g., 1555...)" required>
+                    <input name="index" placeholder="Message Index (from inbox)" required>
+                    <button type="submit">Delete Message</button>
+                </form>
+            `;
+        }
+
+        if (adminKey) {
+            loadAdminData();
+        } else {
+            adminContent.innerHTML = '<p>Admin key is required to access this page.</p>';
+        }
+    </script>
+</body>
+</html>

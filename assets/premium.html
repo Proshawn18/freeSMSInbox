@@ -1,0 +1,117 @@
+<!-- assets/premium.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Numbers</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <div class="container">
+        <a href="/index.html">⬅️ Back to Homepage</a>
+        <h1>💎 Get a Premium Number</h1>
+        <p id="payment-status"></p>
+
+        <div id="premium-content">
+            <h2>Search for a Number</h2>
+            <form id="search-form">
+                <input name="areaCode" placeholder="Area Code (e.g., 512)" required>
+                <input name="contains" placeholder="Contains (e.g., 'TAXI' or '888')">
+                <button type="submit">Search</button>
+            </form>
+            <h2>Results</h2>
+            <ul id="results-list"></ul>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const resultsList = document.getElementById('results-list');
+        const premiumContent = document.getElementById('premium-content');
+        const stripe = Stripe('pk_test_...'); // Your Stripe Publishable Key
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = localStorage.getItem('user-identity');
+            if (!currentUser) {
+                premiumContent.innerHTML = `
+                    <p class="status-error">You must be logged in to purchase a premium number.</p>
+                    <a href="/login.html" class="login-link-btn">Login or Sign Up</a>
+                `;
+            }
+        });
+
+        searchForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            resultsList.innerHTML = '<li>Searching...</li>';
+            
+            const formData = new FormData(searchForm);
+            const params = new URLSearchParams(formData);
+
+            try {
+                const response = await fetch(`/premium/find-numbers?${params.toString()}`);
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error);
+
+                if (data.numbers.length === 0) {
+                    resultsList.innerHTML = '<li>No numbers found. Try another search.</li>';
+                    return;
+                }
+
+                resultsList.innerHTML = data.numbers.map(num => `
+                    <li>
+                        ${num} <button onclick="purchaseNumber('${num}', this)">Buy Now</button>
+                    </li>
+                `).join('');
+
+            } catch (err) {
+                resultsList.innerHTML = `<li>Error: ${err.message}</li>`;
+            }
+        });
+
+        async function purchaseNumber(number, buttonEl) {
+            const currentUser = localStorage.getItem('user-identity');
+            if (!currentUser) {
+                showModal({
+                    title: "Authentication Required",
+                    message: "You must be logged in to purchase a premium number.",
+                    buttons: [
+                        { text: 'Login / Sign Up', class: 'modal-btn-primary', onClick: () => window.location.href = '/login.html' },
+                        { text: 'Cancel', class: 'modal-btn-secondary' }
+                    ]
+                });
+                return;
+            }
+
+            showModal({
+                title: "Confirm Purchase",
+                message: `You are about to purchase <strong>${number}</strong>. This will redirect you to our secure payment processor.`,
+                buttons: [
+                    { text: 'Proceed to Payment', class: 'modal-btn-primary', onClick: async () => {
+                        try {
+                            const params = new URLSearchParams({
+                                numberToBuy: number,
+                                userIdentity: currentUser
+                            });
+                            const response = await fetch(`/premium/create-checkout-session?${params.toString()}`);
+                            const session = await response.json();
+                            if (session.error) throw new Error(session.error);
+                            
+                            const stripe = Stripe('pk_test_...'); // Your Stripe Publishable Key
+                            const result = await stripe.redirectToCheckout({ sessionId: session.sessionId });
+                            if (result.error) {
+                                showModal({ title: "Payment Error", message: result.error.message, buttons: [{ text: 'Close' }] });
+                            }
+                        } catch (err) {
+                            showModal({ title: "Error", message: `Could not start payment: ${err.message}`, buttons: [{ text: 'Close' }] });
+                        }
+                    }},
+                    { text: 'Cancel', class: 'modal-btn-secondary' }
+                ]
+            });
+        }
+    </script>
+</body>
+</html>

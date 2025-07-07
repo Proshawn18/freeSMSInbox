@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Receiver</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Online SMS Receiver</h1>
+        <p>Select a public number to view its messages.</p>
+        
+        <div class="nav-links">
+            <a href="/premium.html">💎 Get a Premium Number</a> | 
+            <a href="/dashboard.html">⚙️ My Dashboard</a> |
+            <a href="/admin.html">🛠️ Admin Panel</a>
+        </div>
+
+        <form action="/search.html" method="GET">
+          <input type="search" name="q" placeholder="Search all messages..." required>
+          <button type="submit">🔍 Search</button>
+        </form>
+
+        <h2>Public Inboxes</h2>
+        <ul id="number-list">
+            <li>Loading numbers...</li>
+        </ul>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/data?query=public-numbers');
+                const numbers = await response.json();
+                const listEl = document.getElementById('number-list');
+
+                if (numbers.length === 0) {
+                    listEl.innerHTML = '<li>No public numbers are available yet. Send an SMS to a configured Twilio number to add it.</li>';
+                    return;
+                }
+
+                listEl.innerHTML = numbers.map(num => `<li><a href="/inbox.html?number=${num}">${num}</a></li>`).join('');
+            } catch (err) {
+                document.getElementById('number-list').innerHTML = '<li>Error loading numbers.</li>';
+            }
+        });
+    </script>
+</body>
+</html>

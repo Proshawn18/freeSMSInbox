@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Sign Up</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="/index.html">⬅️ Back to Homepage</a>
+        <h1>Login or Sign Up</h1>
+        <p>Enter your phone number to receive a verification code.</p>
+
+        <div id="auth-form-container" class="auth-form">
+            <form id="phone-form">
+                <input type="tel" id="phone-number" placeholder="Phone Number (e.g., +1...)" required>
+                <button type="submit">Send Code</button>
+            </form>
+
+            <form id="code-form" class="hidden">
+                <p id="code-message" class="text-sm"></p>
+                <input type="text" id="code" placeholder="6-digit code" required>
+                <button type="submit">Verify Code & Login</button>
+            </form>
+            <p id="error-message" class="text-red-500 mt-2"></p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const phoneForm = document.getElementById('phone-form');
+        const codeForm = document.getElementById('code-form');
+        const phoneNumberInput = document.getElementById('phone-number');
+        const codeInput = document.getElementById('code');
+        const codeMessage = document.getElementById('code-message');
+        const errorMessage = document.getElementById('error-message');
+
+        phoneForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const button = event.target.querySelector('button');
+            showLoading(button);
+
+            try {
+                const response = await fetch('/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ action: 'start-verification', to: phoneNumberInput.value })
+                });
+
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error);
+
+                phoneForm.classList.add('hidden');
+                codeForm.classList.remove('hidden');
+                codeMessage.innerText = `A code was sent to ${phoneNumberInput.value}.`;
+            } catch (err) {
+                showModal({ title: "Error", message: `Could not send code: ${err.message}`, buttons: [{ text: 'Close', class: 'modal-btn-primary' }] });
+            } finally {
+                hideLoading(button);
+            }
+        });
+
+        codeForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const button = event.target.querySelector('button');
+            showLoading(button);
+
+            try {
+                const response = await fetch('/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        action: 'check-verification',
+                        to: phoneNumberInput.value,
+                        code: codeInput.value
+                    })
+                });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error);
+                
+                localStorage.setItem('user-identity', phoneNumberInput.value);
+                window.location.href = '/dashboard.html';
+            } catch (err) {
+                showModal({ title: "Verification Failed", message: err.message, buttons: [{ text: 'Try Again', class: 'modal-btn-primary' }] });
+            } finally {
+                hideLoading(button);
+            }
+        });
+    </script>
+</body>
+</html>

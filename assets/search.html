@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="/index.html">⬅️ Back to all numbers</a>
+        <h1 id="search-title">Search Results</h1>
+        <ul id="results-list"><li>Searching...</li></ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const query = params.get('q');
+            document.getElementById('search-title').innerText = `Search Results for "${query}"`;
+            const listEl = document.getElementById('results-list');
+
+            try {
+                const response = await fetch(`/api/data?query=search&q=${encodeURIComponent(query)}`);
+                const results = await response.json();
+                
+                if (results.length === 0) {
+                    listEl.innerHTML = '<li>No messages found matching your query.</li>';
+                    return;
+                }
+
+                listEl.innerHTML = results.map(msg => `
+                    <li>
+                        <div class="msg-header"><strong>To: ${msg.number}</strong> | <strong>From:</strong> ${msg.from}</div>
+                        <div class="msg-body">${msg.body}</div>
+                        <div class="msg-footer">${new Date(msg.timestamp).toLocaleString()}</div>
+                    </li>
+                `).join('');
+            } catch (err) {
+                listEl.innerHTML = '<li>Error performing search.</li>';
+            }
+        });
+    </script>
+</body>
+</html>

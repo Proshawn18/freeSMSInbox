@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="flex justify-between items-center mb-6">
+            <h1 id="welcome-message" class="text-2xl font-bold">My Dashboard</h1>
+            <button id="logout-btn" class="logout-btn">Logout</button>
+        </nav>
+        <div id="dashboard-content" class="space-y-6">
+            <p>Loading your numbers...</p>
+        </div>
+    </div>
+
+    <script>
+        const dashboardContent = document.getElementById('dashboard-content');
+        const logoutBtn = document.getElementById('logout-btn');
+        const welcomeMessage = document.getElementById('welcome-message');
+
+        let currentUser = null;
+
+        const renderDashboard = (numbers) => {
+            if (numbers.length === 0) {
+                dashboardContent.innerHTML = '<p>You have not purchased any premium numbers yet. <a href="/premium.html">Find one now!</a></p>';
+                return;
+            }
+
+            dashboardContent.innerHTML = numbers.map(numConfig => `
+                <div class="setting-card">
+                    <h2 class="text-xl font-semibold">Number: +${numConfig.number}</h2>
+                    <form class="setting-form" onsubmit="updateSettings(event, '${numConfig.number}')">
+                        <h3 class="font-medium">Auto-Responder</h3>
+                        <p class="text-sm text-gray-600">Set a message to automatically reply to every SMS you receive.</p>
+                        <textarea name="autoReplyMessage" placeholder="e.g., Thanks for your message! I will reply soon.">${numConfig.autoReplyMessage || ''}</textarea>
+                        
+                        <h3 class="font-medium mt-4">Notifications</h3>
+                        <p class="text-sm text-gray-600">Get notified when a new message arrives.</p>
+                        <input type="email" name="notificationEmail" placeholder="Notification Email Address" value="${numConfig.notificationEmail || ''}" />
+                        
+                        <div class="form-status" id="status-${numConfig.number}"></div>
+                        <button type="submit">Save Settings</button>
+                    </form>
+                </div>
+            `).join('');
+        };
+
+        async function updateSettings(event, number) {
+            event.preventDefault();
+            const form = event.target;
+            const statusEl = document.getElementById(`status-${number}`);
+            statusEl.innerText = 'Saving...';
+            statusEl.className = 'form-status status-saving';
+
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/premium/update-settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        user: currentUser,
+                        numberToUpdate: number,
+                        autoReplyMessage: formData.get('autoReplyMessage'),
+                        notificationEmail: formData.get('notificationEmail')
+                    })
+                });
+
+                const result = await response.json();
+                if (!result.success) throw new Error(result.error);
+
+                statusEl.innerText = 'Settings saved successfully!';
+                statusEl.className = 'form-status status-success';
+
+            } catch (err) {
+                statusEl.innerText = `Error: ${err.message}`;
+                statusEl.className = 'form-status status-error';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            currentUser = localStorage.getItem('user-identity');
+
+            if (!currentUser) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            welcomeMessage.innerText = `Dashboard for ${currentUser}`;
+
+            try {
+                const response = await fetch(`/api/data?query=my-numbers&userIdentity=${encodeURIComponent(currentUser)}`);
+                const myNumbers = await response.json();
+                renderDashboard(myNumbers);
+            } catch (err) {
+                dashboardContent.innerHTML = '<p class="text-red-500">Error loading your numbers.</p>';
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('user-identity');
+            window.location.href = '/index.html';
+        });
+    </script>
+</body>
+</html>

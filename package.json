@@ -1,0 +1,19 @@
+{
+  "name": "sms-receiver-platform",
+  "version": "1.3.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "twilio serverless:start",
+    "deploy": "twilio serverless:deploy"
+  },
+  "dependencies": {
+    "@twilio/runtime-handler": "1.2.4",
+    "twilio": "^3.84.1",
+    "stripe": "^10.17.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=16"
+  }
+}

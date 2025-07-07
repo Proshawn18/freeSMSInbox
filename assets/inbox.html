@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inbox</title>
+    <script src="https://media.twiliocdn.com/sdk/js/sync/v1.0/twilio-sync.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="/index.html">⬅️ Back to all numbers</a>
+        <h1 id="inbox-title">Loading Inbox...</h1>
+        <p>Messages appear here in real-time.</p>
+        <ul id="message-list"></ul>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const number = params.get('number');
+        const listEl = document.getElementById('message-list');
+        document.getElementById('inbox-title').innerText = `Inbox for ${number}`;
+
+        const renderMessage = (item) => {
+            const date = new Date(item.data.timestamp).toLocaleString();
+            const mediaEl = item.data.mediaUrl ? `<img src="${item.data.mediaUrl}" alt="MMS Image" class="mms-image">` : '';
+            return `<li>
+                        <div class="msg-header"><strong>From:</strong> ${item.data.from}</div>
+                        <div class="msg-body">${item.data.body}</div>
+                        ${mediaEl}
+                        <div class="msg-footer">${date}</div>
+                    </li>`;
+        };
+
+        const fetchInitialMessages = async () => {
+            try {
+                const response = await fetch(`/api/data?query=messages&number=${number}`);
+                const messages = await response.json();
+                if (messages.length > 0) {
+                    listEl.innerHTML = messages.map(m => renderMessage({data: m})).join('');
+                } else {
+                    listEl.innerHTML = '<li>No messages yet. Send an SMS to this number to begin!</li>';
+                }
+            } catch (err) {
+                listEl.innerHTML = '<li>Error loading initial messages.</li>';
+            }
+        };
+
+        const connectToSync = async () => {
+            try {
+                const response = await fetch('/api/token');
+                const { token } = await response.json();
+
+                const syncClient = new Twilio.Sync.Client(token, { logLevel: 'info' });
+
+                syncClient.on('connectionStateChanged', (state) => {
+                    if (state === 'connected') {
+                        console.log('Sync connected!');
+                        subscribeToMessageList(syncClient);
+                    }
+                });
+
+            } catch (err) {
+                console.error('Could not connect to Sync:', err);
+                listEl.innerHTML += '<li>Could not connect for live updates.</li>';
+            }
+        };
+
+        const subscribeToMessageList = async (syncClient) => {
+            try {
+                const list = await syncClient.list(`messages_${number}`);
+
+                list.on('itemAdded', (event) => {
+                    const firstItem = listEl.querySelector('li');
+                    if (firstItem && firstItem.innerText.includes('No messages yet')) {
+                        listEl.innerHTML = '';
+                    }
+                    const newItemEl = document.createElement('li');
+                    newItemEl.innerHTML = renderMessage(event.item);
+                    listEl.prepend(newItemEl);
+                });
+
+            } catch (error) {
+                if (error.status === 404) {
+                    console.log(`Sync List for messages_${number} doesn't exist yet.`);
+                } else {
+                    console.error('Sync subscription error:', error);
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchInitialMessages();
+            connectToSync();
+        });
+    </script>
+</body>
+</html>

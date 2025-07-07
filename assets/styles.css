@@ -1,0 +1,206 @@
+/* assets/styles.css */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+h1, h2 {
+    color: #121C2D; /* Twilio Dark Blue */
+}
+a {
+    color: #F22F46; /* Twilio Red */
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+#number-list li {
+    background-color: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+#message-list li, #results-list li {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+.msg-header {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 5px;
+}
+.msg-body {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+}
+.msg-footer {
+    font-size: 0.8em;
+    color: #888;
+    text-align: right;
+}
+.mms-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+input[type="search"], input[name="areaCode"], input[name="contains"], input[name="number"], input[name="index"] {
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 5px;
+    margin-bottom: 10px;
+}
+button {
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #001489; /* Twilio Blue */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #000c4f;
+}
+.nav-links {
+    margin: 20px 0;
+    text-align: center;
+    font-size: 1.1em;
+}
+.nav-links a {
+    margin: 0 15px;
+}
+hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 20px 0;
+}
+.debug-link {
+    display: inline-block;
+    background-color: #6366f1; /* Indigo */
+    color: white;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+.debug-link:hover {
+    background-color: #4f46e5;
+    text-decoration: none;
+}
+
+.login-link-btn {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #F22F46; /* Twilio Red */
+    color: white;
+    border-radius: 4px;
+    text-align: center;
+}
+.login-link-btn:hover {
+    background-color: #c51f33;
+    text-decoration: none;
+}
+
+.status-error {
+    color: #dc2626;
+    background-color: #fee2e2;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+/* --- Modal Styles --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.6); /* Slate-900 with opacity */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 500px;
+}
+
+.modal-btn-primary {
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #001489; /* Twilio Blue */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.modal-btn-primary:hover {
+    background-color: #000c4f;
+}
+
+.modal-btn-secondary {
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #f1f5f9; /* Slate 100 */
+    color: #1e293b; /* Slate 800 */
+    border: 1px solid #e2e8f0; /* Slate 200 */
+    border-radius: 4px;
+    cursor: pointer;
+}
+.modal-btn-secondary:hover {
+    background-color: #e2e8f0;
+}
+
+/* --- Spinner Styles --- */
+.spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- UTILITY CLASSES --- */
+.hidden {
+    display: none;
+}
