@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin.html
+Disallow: /admin-debug.html
+Disallow: /dashboard.html
+Disallow: /login.html
+
+Sitemap: https://freesmsinbox.com/sitemap.xml

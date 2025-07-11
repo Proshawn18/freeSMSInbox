@@ -8,8 +8,14 @@
 </head>
 <body>
     <div class="container">
-        <a href="/index.html">⬅️ Back to Homepage</a>
-        <h1>Login or Sign Up</h1>
+        <header class="main-header">
+            <a href="/" class="logo">freeSMSInbox</a>
+            <nav class="main-nav">
+                <a href="/premium.html">💎 Premium</a>
+                <a href="/about.html">About</a>
+            </nav>
+        </header>
+        <h1>Login or Sign Up with freeSMSInbox</h1>
         <p>Enter your phone number to receive a verification code.</p>
 
         <div id="auth-form-container" class="auth-form">
@@ -25,6 +31,9 @@
             </form>
             <p id="error-message" class="text-red-500 mt-2"></p>
         </div>
+        <footer class="main-footer">
+            <p>&copy; 2024 freeSMSInbox | <a href="/privacy.html">Privacy</a> | <a href="/tos.html">Terms</a> | <a href="/contact.html">Contact</a></p>
+        </footer>
     </div>
 
     <script src="app.js"></script>
@@ -48,7 +57,21 @@
                     body: new URLSearchParams({ action: 'start-verification', to: phoneNumberInput.value })
                 });
 
-                const data = await response.json();
+                // Get the raw text of the response first to handle non-JSON responses gracefully.
+                const responseText = await response.text();
+
+                if (!response.ok) {
+                    let errorMsg = `Server returned an error (status ${response.status}).`;
+                    try {
+                        const errorData = JSON.parse(responseText);
+                        errorMsg = errorData.error || errorMsg;
+                    } catch (e) {
+                        console.error("Non-JSON error response from server:", responseText);
+                    }
+                    throw new Error(errorMsg);
+                }
+
+                const data = JSON.parse(responseText);
                 if (!data.success) throw new Error(data.error);
 
                 phoneForm.classList.add('hidden');
@@ -76,7 +99,22 @@
                         code: codeInput.value
                     })
                 });
-                const data = await response.json();
+
+                // Get the raw text of the response first.
+                const responseText = await response.text();
+
+                if (!response.ok) {
+                    let errorMsg = `Server returned an error (status ${response.status}).`;
+                    try {
+                        const errorData = JSON.parse(responseText);
+                        errorMsg = errorData.error || errorMsg;
+                    } catch (e) {
+                        console.error("Non-JSON error response from server:", responseText);
+                    }
+                    throw new Error(errorMsg);
+                }
+
+                const data = JSON.parse(responseText);
                 if (!data.success) throw new Error(data.error);
                 
                 localStorage.setItem('user-identity', phoneNumberInput.value);

@@ -59,17 +59,25 @@ exports.handler = async function(context, event, callback) {
             .filter(item => item.data)
             .map(item => item.data.number);
 
-          let results = [];
           const searchQuery = q ? q.toLowerCase() : '';
-          for (const num of allNumbers) {
-              // CORRECTED: Ensure we are using .list() for message retrieval too.
-              const messages = await client.sync.v1.services(syncServiceSid).syncLists(`messages_${num}`).syncListItems.list();
-              messages.forEach(m => {
-                  if (m.data && m.data.body && m.data.from && (m.data.body.toLowerCase().includes(searchQuery) || m.data.from.toLowerCase().includes(searchQuery))) {
-                      results.push({ ...m.data, number: num });
-                  }
-              });
-          }
+
+          const messagePromises = allNumbers.map(num =>
+            client.sync.v1.services(syncServiceSid).syncLists(`messages_${num}`).syncListItems.list()
+              .then(messages =>
+                messages
+                  .filter(m => m.data && m.data.body && m.data.from && (m.data.body.toLowerCase().includes(searchQuery) || m.data.from.toLowerCase().includes(searchQuery)))
+                  .map(m => ({ ...m.data, number: num }))
+              )
+              .catch(err => {
+                // If a message list for a number doesn't exist, we can safely ignore it.
+                if (err.code === 20404) return [];
+                // For other errors, we might want to know about them.
+                console.error(`Error fetching messages for ${num}:`, err);
+                return [];
+              })
+          );
+          const messageArrays = await Promise.all(messagePromises);
+          const results = messageArrays.flat();
           response.setBody(results);
           break;
       }

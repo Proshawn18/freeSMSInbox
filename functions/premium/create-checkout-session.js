@@ -11,7 +11,7 @@ exports.handler = async function (context, event, callback) {
     return callback(null, response);
   }
 
-  const domainUrl = `https://${context.DOMAIN_NAME}`;
+  const domainUrl = 'https://freesmsinbox.com';
 
   try {
     const session = await stripe.checkout.sessions.create({

@@ -204,3 +204,93 @@ hr {
 .hidden {
     display: none;
 }
+
+/* --- Shared Header & Footer --- */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.main-header .logo {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #121C2D;
+    text-decoration: none;
+}
+
+.main-header .logo:hover {
+    text-decoration: none;
+    color: #F22F46;
+}
+
+.main-header .main-nav a {
+    margin-left: 1.5rem;
+    font-weight: 500;
+    color: #374151; /* Gray-700 */
+}
+
+.main-header .main-nav a:hover {
+    color: #F22F46;
+    text-decoration: none;
+}
+
+footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    font-size: 0.9em;
+    color: #6b7280; /* Gray-500 */
+}
+
+footer a {
+    color: #4b5563; /* Gray-600 */
+    margin: 0 0.5rem;
+}
+
+footer a:hover {
+    color: #F22F46;
+}
+
+/* --- Bookmark Promo Box --- */
+.bookmark-promo {
+    background-color: #fffbe6; /* Light Yellow */
+    color: #92400e; /* Amber-800 */
+    border: 1px solid #fde68a; /* Yellow-300 */
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* --- Subscription Form --- */
+#subscribe-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#subscribe-form input[type="email"] {
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-status {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+.status-success {
+    color: #065f46; /* Green-800 */
+    background-color: #d1fae5; /* Green-100 */
+}

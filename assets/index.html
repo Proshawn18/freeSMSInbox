@@ -2,20 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMS Receiver</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <title>freeSMSInbox - Online SMS Receiver</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>📱 Online SMS Receiver</h1>
-        <p>Select a public number to view its messages.</p>
-        
-        <div class="nav-links">
-            <a href="/premium.html">💎 Get a Premium Number</a> | 
-            <a href="/dashboard.html">⚙️ My Dashboard</a> |
-            <a href="/admin.html">🛠️ Admin Panel</a>
+        <header class="main-header">
+            <a href="/" class="logo">freeSMSInbox</a>
+            <nav class="main-nav">
+                <a href="/premium.html">💎 Premium</a>
+                <a href="/dashboard.html">Dashboard</a>
+                <a href="/about.html">About</a>
+            </nav>
+        </header>
+        <h1>📱 Welcome to freeSMSInbox</h1>
+        <div class="bookmark-promo" id="bookmark-promo" style="cursor:pointer; user-select:none;">
+        ⭐ Bookmark this page (or Share on mobile) for easy access! ⭐<br><small>(Ctrl+D) || (Cmd+D) || (Click to share)</small>
         </div>
+
+        <!-- Bookmark/Share Instructions Modal -->
+        <div id="bookmark-modal" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:#fff; padding:1rem; box-shadow:0 2px 10px rgba(0,0,0,0.2); max-width:320px; z-index:999;">
+        <h3>📌 Save this page</h3>
+        <p id="bookmark-message">
+            Press <strong>Ctrl + D</strong> (Windows) or <strong>Cmd + D</strong> (Mac) to bookmark this page.
+        </p>
+        <button id="bookmark-close" style="margin-top:10px;">Close</button>
+        </div>
+
 
         <form action="/search.html" method="GET">
           <input type="search" name="q" placeholder="Search all messages..." required>
@@ -26,6 +40,21 @@
         <ul id="number-list">
             <li>Loading numbers...</li>
         </ul>
+
+        <hr>
+
+        <h2>Get Notified of New Numbers</h2>
+        <p>Sign up to receive an email when a new public number is added.</p>
+        <form id="subscribe-form">
+            <input type="email" name="email" placeholder="your@email.com" required>
+            <input type="text" name="honeypot_field" style="display:none;" aria-hidden="true">
+            <button type="submit">Subscribe</button>
+        </form>
+        <div id="subscribe-status"></div>
+
+        <footer class="main-footer">
+            <p>&copy; 2024 freeSMSInbox | <a href="/privacy.html">Privacy</a> | <a href="/tos.html">Terms</a> | <a href="/contact.html">Contact</a> | <a href="/admin.html">Admin</a></p>
+        </footer>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
@@ -43,7 +72,85 @@
             } catch (err) {
                 document.getElementById('number-list').innerHTML = '<li>Error loading numbers.</li>';
             }
+
+            // --- Subscription Form Logic ---
+            const subscribeForm = document.getElementById('subscribe-form');
+            const subscribeStatus = document.getElementById('subscribe-status');
+
+            if (subscribeForm) {
+                subscribeForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    const button = subscribeForm.querySelector('button');
+                    const formData = new FormData(subscribeForm);
+
+                    button.disabled = true;
+                    button.textContent = 'Subscribing...';
+                    subscribeStatus.textContent = '';
+                    subscribeStatus.className = 'form-status';
+
+                    try {
+                        const response = await fetch('/api/subscribe', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: new URLSearchParams(formData)
+                        });
+                        const result = await response.json();
+                        if (result.error) {
+                            throw new Error(result.error);
+                        }
+                        subscribeStatus.textContent = 'Success! Please check your email to confirm your subscription.';
+                        subscribeStatus.className = 'form-status status-success';
+                        subscribeForm.reset();
+                    } catch (err) {
+                        subscribeStatus.textContent = `Error: ${err.message}`;
+                        subscribeStatus.className = 'form-status status-error';
+                    } finally {
+                        button.disabled = false;
+                        button.textContent = 'Subscribe';
+                    }
+                });
+            }
         });
+        const promo = document.getElementById('bookmark-promo');
+        const modal = document.getElementById('bookmark-modal');
+        const closeBtn = document.getElementById('bookmark-close');
+        const message = document.getElementById('bookmark-message');
+
+        promo.addEventListener('click', async () => {
+        // Native share works on iOS Safari, Chrome on Android, and some desktop browsers
+        if (navigator.share) {
+            try {
+            await navigator.share({
+                title: document.title,
+                url: window.location.href
+            });
+            } catch (err) {
+            // If user cancels or share fails, show modal fallback
+            showBookmarkFallback();
+            }
+        } else {
+            // Not supported — show fallback
+            showBookmarkFallback();
+        }
+        });
+
+        function showBookmarkFallback() {
+        // Adjust instructions based on platform
+        if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+            message.innerHTML = `Tap the <strong>Share</strong> button <span style="font-size:1.2em;">📤</span> in Safari and choose <strong>"Add to Home Screen"</strong>.`;
+        } else if (/android/i.test(navigator.userAgent)) {
+            message.innerHTML = `Tap the <strong>menu ⋮</strong> button in Chrome and choose <strong>"Add to Home screen"</strong>.`;
+        } else {
+            message.innerHTML = `Press <strong>Ctrl + D</strong> (Windows) or <strong>Cmd + D</strong> (Mac) to bookmark this page.`;
+        }
+
+        modal.style.display = 'block';
+        }
+
+        closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+        });
+
     </script>
 </body>
 </html>

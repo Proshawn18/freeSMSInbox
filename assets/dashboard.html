@@ -8,13 +8,23 @@
 </head>
 <body>
     <div class="container">
-        <nav class="flex justify-between items-center mb-6">
+        <header class="main-header">
+            <a href="/" class="logo">freeSMSInbox</a>
+            <nav class="main-nav">
+                <a href="/premium.html">💎 Get a new number</a>
+                <a href="/about.html">About</a>
+                <button id="logout-btn" class="logout-btn">Logout</button>
+            </nav>
+        </header>
+        <div class="flex justify-between items-center mb-6">
             <h1 id="welcome-message" class="text-2xl font-bold">My Dashboard</h1>
-            <button id="logout-btn" class="logout-btn">Logout</button>
-        </nav>
+        </div>
         <div id="dashboard-content" class="space-y-6">
             <p>Loading your numbers...</p>
         </div>
+        <footer class="main-footer">
+            <p>&copy; 2024 freeSMSInbox | <a href="/privacy.html">Privacy</a> | <a href="/tos.html">Terms</a> | <a href="/contact.html">Contact</a></p>
+        </footer>
     </div>
 
     <script>

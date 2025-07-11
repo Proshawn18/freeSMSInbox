@@ -3,6 +3,10 @@ exports.handler = async function (context, event, callback) {
   const client = context.getTwilioClient();
   const response = new Twilio.Response();
   response.appendHeader('Content-Type', 'application/json');
+  response.appendHeader('Access-Control-Allow-Origin', '*');
+  response.appendHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  response.appendHeader('Access-Control-Allow-Headers', 'Content-Type');
+
 
   const { action, to, code } = event;
 
@@ -35,6 +39,8 @@ exports.handler = async function (context, event, callback) {
           .services(context.VERIFY_SERVICE_SID)
           .verifications.create({ to: formattedTo, channel: 'sms' }); // Use the formatted number
 
+        console.log('Verification response:', verification);
+
         response.setBody({ success: true, status: verification.status });
         break;
       }
@@ -63,7 +69,7 @@ exports.handler = async function (context, event, callback) {
   } catch (error) {
     console.error(`Auth Error: ${error}`);
     // Pass the specific error message from Twilio back to the frontend
-    response.setStatusCode(500).setBody({ success: false, error: error.message });
+    response.setStatusCode(500).setBody({ success: false, error: ""||error.message });
     return callback(null, response);
   }
 };
